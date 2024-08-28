@@ -32,10 +32,10 @@ while True:
         break
 
     # Convert the frame to grayscale
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    grey_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Calculate Optical Flow using the Lucas-Kanade method
-    new_point, status, error = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, pendulum_point, None, **lk_params)
+    new_point, status, error = cv2.calcOpticalFlowPyrLK(old_gray, grey_frame, pendulum_point, None, **lk_params)
 
     # If the point is found (status == 1)
     if status[0] == 1:
@@ -62,7 +62,7 @@ while True:
         break
 
     # Update the previous frame and previous points
-    old_gray = frame_gray.copy()
+    old_gray = grey_frame.copy()
 
 # Release the capture and close all OpenCV windows
 cap.release()
