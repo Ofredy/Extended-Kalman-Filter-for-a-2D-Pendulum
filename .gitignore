@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+# Ignored folders created by me
+test/optical_tracking_test/camera_calibration_test/calibration_images_1
