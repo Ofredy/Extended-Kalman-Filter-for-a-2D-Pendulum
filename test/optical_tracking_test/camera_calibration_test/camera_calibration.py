@@ -47,6 +47,10 @@ print(mtx)
 print("\nDistortion coefficients:")
 print(dist)
 
+# Save camera matrix and distortion coefficients
+np.save('camera_matrix.npy', mtx)
+np.save('dist_coeffs.npy', dist)
+
 # Optionally, undistort an image
 img = cv2.imread('calibration_images_1/calib_image_1.jpg')
 h, w = img.shape[:2]
