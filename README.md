@@ -1,1 +1,1 @@
-# Real-Time-Tracking-of-a-Spherical-Pendulum
+# Real-Time-Tracking-of-a-2D-Pendulum
