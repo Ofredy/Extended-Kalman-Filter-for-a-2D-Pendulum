@@ -29,7 +29,7 @@ class PendulumRendering:
 
         # Create pendulum arm and bob (pre-allocate)
         self.line, = self.ax.plot([], [], color='blue', label='Pendulum Arm')  # Line for the arm
-        self.circle = plt.Circle((0, -L), 0.0875, color='red', label='Pendulum Bob')  # Circle for the bob
+        self.circle = plt.Circle((0, -L), 0.075, color='red', label='Pendulum Ball')  # Circle for the bob
         self.ax.add_patch(self.circle)
 
         self.ax.set_aspect('equal')
@@ -39,7 +39,7 @@ class PendulumRendering:
 
         # Rendering position update
         self.x = L * np.sin(self.x_n[0])
-        self.y = L * np.cos(self.x_n[0]) 
+        self.y = L * np.cos(self.x_n[0])  # Negate to make downward motion correct
 
     def _system_step(self, _):
 
@@ -53,15 +53,19 @@ class PendulumRendering:
         # Update the circle (pendulum bob)
         self.circle.center = (self.x, self.y)
 
+        # Return the updated objects for blitting
+        return self.line, self.circle
+
     def render(self):
 
-        # Animate without clearing everything on each frame
-        _ = FuncAnimation(self.fig, self._system_step, interval=50)
+        # Animate with blitting to improve performance
+        _ = FuncAnimation(self.fig, self._system_step, interval=50, blit=True)
 
         plt.tight_layout()
         plt.show()
 
 
 if __name__ == "__main__":
+
     rendering = PendulumRendering()
     rendering.render()
