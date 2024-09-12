@@ -7,10 +7,12 @@ from matplotlib.animation import FuncAnimation
 
 # Define the pendulum dynamics function
 def pendulum_dynamics(y, t, g, L, gamma):
+
     theta, omega = y
     dtheta_dt = omega
     domega_dt = - (g / L) * np.sin(theta) - (gamma/mass) * omega
-    return [dtheta_dt, domega_dt]
+
+    return [ dtheta_dt, domega_dt ]
 
 # Initial conditions
 y0 = [np.pi / 4, 0]  # Initial angle (45 degrees) and initial angular velocity (0)
@@ -19,7 +21,8 @@ y0 = [np.pi / 4, 0]  # Initial angle (45 degrees) and initial angular velocity (
 mass = 1 # mass of ball g   
 g = 9.81  # gravitational acceleration (m/s^2)
 L = 1.0   # length of the pendulum (m)
-gamma = 2  # damping coefficient
+gamma = 1 # damping coefficient
+process_noise_std = 0.01
 
 # Time array
 t = np.arange(0, 10, 0.05)
@@ -30,6 +33,10 @@ solution = odeint(pendulum_dynamics, y0, t, args=(g, L, gamma))
 # Extract the results
 theta = solution[:, 0]  # Angle theta
 theta_dot = solution[:, 1]  # Angular velocity
+
+# Add process noise to the results
+theta_noisy = theta + np.random.normal(0, process_noise_std, len(theta))
+theta_dot_noisy = theta_dot + np.random.normal(0, process_noise_std, len(theta_dot))
 
 # Plot the results
 plt.figure(figsize=(12, 6))
