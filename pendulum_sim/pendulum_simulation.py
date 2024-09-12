@@ -79,7 +79,7 @@ def update(i):
     return line, circle
 
 # Create the animation
-ani = FuncAnimation(fig, update, frames=len(t), init_func=init, blit=True, interval=50)
+ani = FuncAnimation(fig, update, frames=len(t), init_func=init, blit=True, interval=50, repeat=True)
 
 # Display the animation
 plt.show()
