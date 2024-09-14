@@ -143,24 +143,32 @@ def plot_kalman_error(monte_runs, ekf_simulation_summary):
     plt.figure(2)
 
     monte_kalman_estimates = ekf_simulation_summary['ekf_estimates']
+    monte_covariance_time_steps = ekf_simulation_summary['covariance']
 
     for run_idx in range(NUM_MONTE_RUNS):
 
         theta = monte_runs[run_idx][:, 0]
         kalman_estimates = monte_kalman_estimates[run_idx][:]
+        covariance = monte_covariance_time_steps[run_idx][:]
 
         error = theta - kalman_estimates
 
+        # Calculate confidence intervals
+        confidence_interval_upper = error + 3 * covariance
+        confidence_interval_lower = error - 3 * covariance
+
         if run_idx == 0:
             plt.plot(t, error, 'k', label='EKF Estimate Error')
+            plt.fill_between(t, confidence_interval_lower, confidence_interval_upper, color='y', alpha=0.5, label='95% Confidence Interval')
 
         else:
             plt.plot(t, error, 'k')
+            plt.fill_between(t, confidence_interval_lower, confidence_interval_upper, color='y', alpha=0.5)
 
     # Add labels and legend
     plt.xlabel('time [s]')
     plt.ylabel('Error [rad]')
-    plt.title('EKF Error vs Time')
+    plt.title('EKF Error vs Time With Covariance Confidence')
     plt.legend()
     plt.grid(True)
 
