@@ -103,8 +103,8 @@ def plot_kalman_results(monte_runs, monte_kalman_estimates, monte_measurement_ti
         measurement_time_steps = monte_measurement_time_steps[run_idx][:]
 
         # Calculate confidence intervals
-        confidence_interval_upper = kalman_estimates + 1.96 * measurement_noise_std
-        confidence_interval_lower = kalman_estimates - 1.96 * measurement_noise_std
+        confidence_interval_upper = kalman_estimates + 3 * measurement_noise_std
+        confidence_interval_lower = kalman_estimates - 3 * measurement_noise_std
 
         if run_idx == 0:
             plt.plot(t, theta, 'g', label='True Theta')
