@@ -168,7 +168,7 @@ def plot_kalman_error(monte_runs, ekf_simulation_summary):
     # Add labels and legend
     plt.xlabel('time [s]')
     plt.ylabel('Error [rad]')
-    plt.title('EKF Error vs Time With Covariance Confidence')
+    plt.title('EKF Error vs Time With Confidence Interval')
     plt.legend()
     plt.grid(True)
 
