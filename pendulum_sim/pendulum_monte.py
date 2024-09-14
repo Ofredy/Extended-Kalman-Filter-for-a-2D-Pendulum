@@ -65,8 +65,9 @@ def simulation_init():
 
 def kalman_filter_simulation(monte_runs):
 
-    monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
     monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
+    monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
+    monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
 
     for run_idx in range(NUM_MONTE_RUNS):
 
@@ -85,16 +86,24 @@ def kalman_filter_simulation(monte_runs):
 
             x_n, P_n = ekf_update_t(x_prediction, P_n, z)
 
-            monte_measurement_time_steps[run_idx][time_step_idx] = measurement
             monte_kalman_estimates[run_idx][time_step_idx] = x_n[0][0]
+            monte_measurement_time_steps[run_idx][time_step_idx] = measurement
+            monte_covaraince_time_steps[run_idx][time_step_idx] = P_n[0][0]
 
-    return monte_kalman_estimates, monte_measurement_time_steps
+    ekf_simulation_summary = { 'ekf_estimates': monte_kalman_estimates,
+                               'measurements': monte_measurement_time_steps,
+                               'covariance': monte_covaraince_time_steps }
 
-def plot_kalman_results(monte_runs, monte_kalman_estimates, monte_measurement_time_steps):
+    return ekf_simulation_summary
+
+def plot_kalman_results(monte_runs, ekf_simulation_summary):
 
     # Time array
     t = np.arange(0, simulation_time, dt)
     plt.figure(1)
+
+    monte_kalman_estimates = ekf_simulation_summary['ekf_estimates']
+    monte_measurement_time_steps = ekf_simulation_summary['measurements']
 
     for run_idx in range(NUM_MONTE_RUNS):
 
@@ -127,11 +136,13 @@ def plot_kalman_results(monte_runs, monte_kalman_estimates, monte_measurement_ti
 
     plt.savefig("ekf_monte_results.png")
 
-def plot_kalman_error(monte_runs, monte_kalman_estimates):
+def plot_kalman_error(monte_runs, ekf_simulation_summary):
 
     # Time array
     t = np.arange(0, simulation_time, dt)
     plt.figure(2)
+
+    monte_kalman_estimates = ekf_simulation_summary['ekf_estimates']
 
     for run_idx in range(NUM_MONTE_RUNS):
 
@@ -163,9 +174,9 @@ if __name__ == "__main__":
     monte_runs = add_noise_to_monte_runs(monte_runs)
 
     # do ekf monte sim
-    monte_kalman_estimates, monte_measurements_time_steps = kalman_filter_simulation(monte_runs)
+    ekf_simulation_summary = kalman_filter_simulation(monte_runs)
 
     # show results
-    plot_kalman_results(monte_runs, monte_kalman_estimates, monte_measurements_time_steps)
-    plot_kalman_error(monte_runs, monte_kalman_estimates)
+    plot_kalman_results(monte_runs, ekf_simulation_summary)
+    plot_kalman_error(monte_runs, ekf_simulation_summary)
     plt.show()
