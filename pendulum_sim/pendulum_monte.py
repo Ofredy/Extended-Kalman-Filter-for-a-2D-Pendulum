@@ -67,43 +67,58 @@ def simulation_init():
 
 def kalman_filter_simulation(monte_runs):
 
-    theta = monte_runs[0][:, 0]
+    monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
+    monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
 
-    x_n, P_n = simulation_init()
-    measurement_time_steps = np.zeros(shape=(int(simulation_time/dt)))
-    kalman_estimates = np.zeros(shape=(int(simulation_time/dt)))
+    for run_idx in range(NUM_MONTE_RUNS):
 
-    for time_step_idx in range(int(simulation_time//dt)):
+        theta = monte_runs[run_idx][:, 0]
 
-        # make prediction 
-        x_prediction, P_n = ekf_predict_t(x_n, P_n)
+        x_n, P_n = simulation_init()
 
-        # state update
-        measurement = theta[time_step_idx] + np.random.normal(0, measurement_noise_std)
-        z = L * np.sin(measurement)
+        for time_step_idx in range(int(simulation_time//dt)):
 
-        x_n, P_n = ekf_update_t(x_prediction, P_n, z)
+            # make prediction 
+            x_prediction, P_n = ekf_predict_t(x_n, P_n)
 
-        measurement_time_steps[time_step_idx] = measurement
-        kalman_estimates[time_step_idx] = x_n[0][0]
+            # state update
+            measurement = theta[time_step_idx] + np.random.normal(0, measurement_noise_std)
+            z = L * np.sin(measurement)
 
-    return kalman_estimates, measurement_time_steps
+            x_n, P_n = ekf_update_t(x_prediction, P_n, z)
 
-def plot_kalman_results(monte_runs, kalman_estimates, measurement_time_steps):
+            monte_measurement_time_steps[run_idx][time_step_idx] = measurement
+            monte_kalman_estimates[run_idx][time_step_idx] = x_n[0][0]
+
+    return monte_kalman_estimates, monte_measurement_time_steps
+
+def plot_kalman_results(monte_runs, monte_kalman_estimates, monte_measurement_time_steps):
 
     # Time array
     t = np.arange(0, simulation_time, dt)
+    plt.figure(1)
 
-    theta = monte_runs[0][:, 0]
+    for run_idx in range(NUM_MONTE_RUNS):
 
-    # Calculate confidence intervals
-    confidence_interval_upper = kalman_estimates + 1.96 * measurement_noise_std
-    confidence_interval_lower = kalman_estimates - 1.96 * measurement_noise_std
+        theta = monte_runs[run_idx][:, 0]
+        kalman_estimates = monte_kalman_estimates[run_idx][:]
+        measurement_time_steps = monte_measurement_time_steps[run_idx][:]
 
-    plt.plot(t, theta, 'g', label='True Theta')
-    plt.plot(t, kalman_estimates, 'r-', label='Kalman Filter Estimates')
-    plt.plot(t, measurement_time_steps, 'b.', label='Measurements')
-    plt.fill_between(t, confidence_interval_lower, confidence_interval_upper, color='y', alpha=0.5, label='95% Confidence Interval')
+        # Calculate confidence intervals
+        confidence_interval_upper = kalman_estimates + 1.96 * measurement_noise_std
+        confidence_interval_lower = kalman_estimates - 1.96 * measurement_noise_std
+
+        if run_idx == 0:
+            plt.plot(t, theta, 'g', label='True Theta')
+            plt.plot(t, kalman_estimates, 'r-', label='EKF Estimates')
+            plt.plot(t, measurement_time_steps, 'b.', label='Measurements')
+            plt.fill_between(t, confidence_interval_lower, confidence_interval_upper, color='y', alpha=0.5, label='95% Confidence Interval')
+
+        else:
+            plt.plot(t, theta, 'g')
+            plt.plot(t, kalman_estimates, 'r-')
+            plt.plot(t, measurement_time_steps, 'b.')
+            plt.fill_between(t, confidence_interval_lower, confidence_interval_upper, color='y', alpha=0.5)
 
     # Add labels and legend
     plt.xlabel('time [s]')
@@ -112,14 +127,43 @@ def plot_kalman_results(monte_runs, kalman_estimates, measurement_time_steps):
     plt.legend()
     plt.grid(True)
 
-    # Show the plot
-    plt.show()
+def plot_kalman_error(monte_runs, monte_kalman_estimates):
+
+    # Time array
+    t = np.arange(0, simulation_time, dt)
+    plt.figure(2)
+
+    for run_idx in range(NUM_MONTE_RUNS):
+
+        theta = monte_runs[run_idx][:, 0]
+        kalman_estimates = monte_kalman_estimates[run_idx][:]
+
+        error = theta - kalman_estimates
+
+        if run_idx == 0:
+            plt.plot(t, error, 'k', label='EKF Estimate Error')
+
+        else:
+            plt.plot(t, error, 'k')
+
+    # Add labels and legend
+    plt.xlabel('time [s]')
+    plt.ylabel('Error [rad]')
+    plt.title('EKF Error vs Time')
+    plt.legend()
+    plt.grid(True)
 
 
 if __name__ == "__main__":
 
+    # create monte data
     monte_runs = generate_monte_runs()
     monte_runs = add_noise_to_monte_runs(monte_runs)
 
-    kalman_estimates, measurements_time_steps = kalman_filter_simulation(monte_runs)
-    plot_kalman_results(monte_runs, kalman_estimates, measurements_time_steps)
+    # do ekf monte sim
+    monte_kalman_estimates, monte_measurements_time_steps = kalman_filter_simulation(monte_runs)
+
+    # show results
+    plot_kalman_results(monte_runs, monte_kalman_estimates, monte_measurements_time_steps)
+    plot_kalman_error(monte_runs, monte_kalman_estimates)
+    plt.show()
