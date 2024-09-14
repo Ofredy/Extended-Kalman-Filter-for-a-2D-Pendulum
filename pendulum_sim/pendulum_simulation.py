@@ -10,8 +10,15 @@ mass = 1 # mass of ball g
 g = 9.81  # gravitational acceleration (m/s^2)
 L = 1.0   # length of the pendulum (m)
 gamma = 1 # damping coefficient
-process_noise_std = 0.01
 
+process_noise_std = 0.01
+measurement_noise_std = 0.01
+
+simulation_time = 10 #s
+dt = 0.05 # 50 ms
+
+Q = dt * np.array([[process_noise_std, 0],
+                   [ 0, process_noise_std]])
 
 # Define the pendulum dynamics function
 def pendulum_dynamics(y, t, g, L, gamma):
@@ -29,7 +36,7 @@ if __name__ == "__main__":
     y0 = [np.pi / 4, 0]  # Initial angle (45 degrees) and initial angular velocity (0)
 
     # Time array
-    t = np.arange(0, 10, 0.05)
+    t = np.arange(0, simulation_time, dt)
 
     # Solve the ODE 
     solution = odeint(pendulum_dynamics, y0, t, args=(g, L, gamma))
