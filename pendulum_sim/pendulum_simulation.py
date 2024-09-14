@@ -16,7 +16,7 @@ force_frequency = 1
 process_noise_std = 0.01
 measurement_noise_std = 0.01
 
-simulation_time = 20 #s
+simulation_time = 10 #s
 force_simulation_time = 20 #s
 dt = 0.05 # 50 ms
 

@@ -12,7 +12,7 @@ from pendulum_ekf import *
 NUM_MONTE_RUNS = 50
 
 
-def generate_monte_runs(theta_range=[np.pi/2, -np.pi/2]):
+def generate_monte_runs(theta_range=[np.pi/2, -np.pi/2], external_force=False):
 
     x_0 = np.zeros(shape=(NUM_MONTE_RUNS, 2))
     x_0[:, 0] = np.linspace(theta_range[0], theta_range[1], num=NUM_MONTE_RUNS)
@@ -20,11 +20,16 @@ def generate_monte_runs(theta_range=[np.pi/2, -np.pi/2]):
     monte_runs = []
 
     # Time array
-    t = np.arange(0, simulation_time, 0.05)
+    t = np.arange(0, simulation_time, 0.05) if not external_force else np.arange(0, force_simulation_time, 0.05)
 
     for idx in range(NUM_MONTE_RUNS):
 
-        solution_n = odeint(pendulum_dynamics, x_0[idx], t, args=(g, L, gamma))
+        if not external_force:
+            solution_n = odeint(pendulum_dynamics, x_0[idx], t, args=(g, L, gamma, None, None))
+
+        else:
+            solution_n = odeint(pendulum_dynamics, x_0[idx], t, args=(g, L, gamma, force_mag, force_frequency, True))
+
         monte_runs.append(solution_n)
 
     return monte_runs
@@ -42,10 +47,10 @@ def add_noise_to_monte_runs(monte_runs):
 
     return monte_runs
 
-def plot_monte_runs(monte_runs):
+def plot_monte_runs(monte_runs, external_force=False):
 
     # Time array
-    t = np.arange(0, simulation_time, dt)
+    t = np.arange(0, simulation_time, dt) if not external_force else np.arange(0, force_simulation_time, dt)
 
     for idx in range(NUM_MONTE_RUNS):
 
@@ -63,11 +68,17 @@ def simulation_init():
     return np.array([0, 0]).reshape(-1, 1), np.array([[ 5, 0 ],
                                                       [ 0, 5 ]])
 
-def kalman_filter_simulation(monte_runs):
+def kalman_filter_simulation(monte_runs, external_force=False):
 
-    monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
-    monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
-    monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
+    if not external_force:
+        monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
+        monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
+        monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/dt)))
+
+    else:
+        monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/dt)))
+        monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/dt)))
+        monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/dt)))
 
     for run_idx in range(NUM_MONTE_RUNS):
 
@@ -75,7 +86,9 @@ def kalman_filter_simulation(monte_runs):
 
         x_n, P_n = simulation_init()
 
-        for time_step_idx in range(int(simulation_time//dt)):
+        loop_range = int(simulation_time//dt) if not external_force else int(force_simulation_time//dt)
+
+        for time_step_idx in range(loop_range):
 
             # make prediction 
             x_prediction, P_n = ekf_predict_t(x_n, P_n)
@@ -96,10 +109,10 @@ def kalman_filter_simulation(monte_runs):
 
     return ekf_simulation_summary
 
-def plot_kalman_results(monte_runs, ekf_simulation_summary):
+def plot_kalman_results(monte_runs, ekf_simulation_summary, external_force=False):
 
     # Time array
-    t = np.arange(0, simulation_time, dt)
+    t = np.arange(0, simulation_time, dt) if not external_force else np.arange(0, force_simulation_time, dt)
     plt.figure(1)
 
     monte_kalman_estimates = ekf_simulation_summary['ekf_estimates']
@@ -130,16 +143,26 @@ def plot_kalman_results(monte_runs, ekf_simulation_summary):
     # Add labels and legend
     plt.xlabel('time [s]')
     plt.ylabel('theta [rad]')
-    plt.title('Pendulum EKF Monte Results Estimates with Confidence Interval')
+
+    if not external_force:
+        plt.title('Pendulum EKF Monte Results Estimates with Confidence Interval')
+
+    else:
+        plt.title('Pendulum EKF With External Force Monte Results Estimates with Confidence Interval')
+
     plt.legend()
     plt.grid(True)
 
-    plt.savefig("ekf_monte_results.png")
+    if not external_force:
+        plt.savefig("ekf_monte_results.png")
 
-def plot_kalman_error(monte_runs, ekf_simulation_summary):
+    else:
+        plt.savefig("ekf_external_force_monte_results.png")
+
+def plot_kalman_error(monte_runs, ekf_simulation_summary, external_force=False):
 
     # Time array
-    t = np.arange(0, simulation_time, dt)
+    t = np.arange(0, simulation_time, dt) if not external_force else np.arange(0, force_simulation_time, dt)
     plt.figure(2)
 
     monte_kalman_estimates = ekf_simulation_summary['ekf_estimates']
@@ -168,11 +191,21 @@ def plot_kalman_error(monte_runs, ekf_simulation_summary):
     # Add labels and legend
     plt.xlabel('time [s]')
     plt.ylabel('Error [rad]')
-    plt.title('EKF Error vs Time With Confidence Interval')
+
+    if not external_force:
+        plt.title('EKF Monte Error vs Time With Confidence Interval')
+
+    else:
+        plt.title('EKF With External Force Monte Error vs Time With Confidence Interval')
+    
     plt.legend()
     plt.grid(True)
 
-    plt.savefig("ekf_monte_error.png")
+    if not external_force:
+        plt.savefig("ekf_monte_error.png")
+
+    else:
+        plt.savefig("ekf_external_force_monte_error.png")
 
 
 if __name__ == "__main__":
@@ -187,4 +220,18 @@ if __name__ == "__main__":
     # show results
     plot_kalman_results(monte_runs, ekf_simulation_summary)
     plot_kalman_error(monte_runs, ekf_simulation_summary)
+    plt.show()
+
+
+    ################# external for simulation #################
+    # create monte data
+    ex_force_monte_runs = generate_monte_runs(external_force=True)
+    ex_force_monte_runs = add_noise_to_monte_runs(ex_force_monte_runs)
+
+    # do ekf monte sim
+    ekf_ex_force_simulation_summary = kalman_filter_simulation(ex_force_monte_runs, external_force=True)
+
+    # show results
+    plot_kalman_results(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
+    plot_kalman_error(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
     plt.show()
