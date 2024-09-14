@@ -47,8 +47,6 @@ def plot_monte_runs(monte_runs):
     # Time array
     t = np.arange(0, simulation_time, dt)
 
-    kalman_estimates = np.zeros(shape=(int(simulation_time/dt)))
-
     for idx in range(NUM_MONTE_RUNS):
 
         plt.plot(t, monte_runs[idx][:, 0])
@@ -127,6 +125,8 @@ def plot_kalman_results(monte_runs, monte_kalman_estimates, monte_measurement_ti
     plt.legend()
     plt.grid(True)
 
+    plt.savefig("ekf_monte_results.png")
+
 def plot_kalman_error(monte_runs, monte_kalman_estimates):
 
     # Time array
@@ -152,6 +152,8 @@ def plot_kalman_error(monte_runs, monte_kalman_estimates):
     plt.title('EKF Error vs Time')
     plt.legend()
     plt.grid(True)
+
+    plt.savefig("ekf_monte_error.png")
 
 
 if __name__ == "__main__":
