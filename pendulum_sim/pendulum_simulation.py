@@ -10,22 +10,30 @@ mass = 1 # mass of ball g
 g = 9.81  # gravitational acceleration (m/s^2)
 L = 1.0   # length of the pendulum (m)
 gamma = 1 # damping coefficient
+force_mag = 10
+force_frequency = 1
 
 process_noise_std = 0.01
 measurement_noise_std = 0.01
 
-simulation_time = 10 #s
+simulation_time = 20 #s
+force_simulation_time = 20 #s
 dt = 0.05 # 50 ms
 
 Q = dt * np.array([[process_noise_std, 0],
                    [ 0, process_noise_std]])
 
 # Define the pendulum dynamics function
-def pendulum_dynamics(y, t, g, L, gamma):
+def pendulum_dynamics(y, t, g, L, gamma, force_mag, force_frequency, external_force=False):
 
     theta, omega = y
     dtheta_dt = omega
-    domega_dt = - (g / L) * np.sin(theta) - (gamma/mass) * omega
+
+    if not external_force:
+        domega_dt = - (g / L) * np.sin(theta) - (gamma/mass) * omega
+
+    else:
+        domega_dt = - (g / L) * np.sin(theta) - (gamma/mass) * omega + force_mag * np.cos(2 * np.pi * force_frequency * t)
 
     return [ dtheta_dt, domega_dt ]
 
@@ -39,7 +47,7 @@ if __name__ == "__main__":
     t = np.arange(0, simulation_time, dt)
 
     # Solve the ODE 
-    solution = odeint(pendulum_dynamics, y0, t, args=(g, L, gamma))
+    solution = odeint(pendulum_dynamics, y0, t, args=(g, L, gamma, force_mag, force_frequency, True))
 
     # Extract the results
     theta = solution[:, 0]  # Angle theta
