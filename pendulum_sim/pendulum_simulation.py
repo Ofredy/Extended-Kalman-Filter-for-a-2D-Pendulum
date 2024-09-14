@@ -25,7 +25,7 @@ x_0_guess_variance = 0.1
 simulation_time = 10 #s
 force_simulation_time = 20 #s
 dt = 0.05 # 50 ms
-measurement_hz = 20
+measurement_hz = 1
 
 Q = dt * np.array([[process_noise_variance, 0],
                    [ 0, process_noise_variance]])
