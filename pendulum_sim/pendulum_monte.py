@@ -69,8 +69,9 @@ def plot_monte_runs(monte_runs, external_force=False):
 
 def simulation_init():
 
-    return np.array([0, 0]).reshape(-1, 1), np.array([[ 5, 0 ],
-                                                      [ 0, 5 ]])
+    return np.array([np.random.normal(0, math.sqrt(x_0_guess_variance)), 0]).reshape(-1, 1), \
+           np.array([[ x_0_guess_variance, 0 ],
+                     [ 0, x_0_guess_variance ]])
 
 def kalman_filter_simulation(monte_runs, external_force=False):
 
@@ -143,8 +144,8 @@ def plot_kalman_results(monte_runs, ekf_simulation_summary, external_force=False
         measurement_time_steps = monte_measurement_time_steps[run_idx][:]
 
         # Calculate confidence intervals
-        confidence_interval_upper = kalman_estimates + 3 * math.sqrt(measurement_noise_variance)
-        confidence_interval_lower = kalman_estimates - 3 * math.sqrt(measurement_noise_variance)
+        confidence_interval_upper = kalman_estimates + 3 * math.sqrt(process_noise_variance)
+        confidence_interval_lower = kalman_estimates - 3 * math.sqrt(process_noise_variance)
 
         if run_idx == 0:
             plt.plot(t, theta, 'g', label='True Theta')
@@ -273,7 +274,6 @@ if __name__ == "__main__":
     # show results
     plot_kalman_results(monte_runs, ekf_simulation_summary)
     plot_kalman_error(monte_runs, ekf_simulation_summary)
-    plot_kalman_gain(ekf_simulation_summary, figure_num=3)
     plt.show()
 
 
@@ -288,5 +288,4 @@ if __name__ == "__main__":
     # show results
     plot_kalman_results(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
     plot_kalman_error(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
-    plot_kalman_gain(ekf_ex_force_simulation_summary, figure_num=3, external_force=True)
     plt.show()

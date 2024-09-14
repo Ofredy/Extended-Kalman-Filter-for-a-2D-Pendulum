@@ -16,13 +16,16 @@ gamma = 1 # damping coefficient
 force_mag = 10
 force_frequency = 1
 
+# kalman filter constants
 process_noise_variance = 0.01
 measurement_noise_variance = 0.01
+x_0_guess_variance = 0.1
 
+# monte carlo constants
 simulation_time = 10 #s
 force_simulation_time = 20 #s
 dt = 0.05 # 50 ms
-measurement_hz = 1
+measurement_hz = 20
 
 Q = dt * np.array([[process_noise_variance, 0],
                    [ 0, process_noise_variance]])
