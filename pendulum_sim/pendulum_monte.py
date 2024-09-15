@@ -277,7 +277,7 @@ if __name__ == "__main__":
     plt.show()
 
 
-    ################# external for simulation #################
+    ################# external force simulation #################
     # create monte data
     ex_force_monte_runs = generate_monte_runs(external_force=True)
     ex_force_monte_runs = add_noise_to_monte_runs(ex_force_monte_runs)
