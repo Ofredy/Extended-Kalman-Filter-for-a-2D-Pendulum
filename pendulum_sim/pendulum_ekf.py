@@ -4,24 +4,24 @@ import numpy as np
 from pendulum_simulation import *
 
 
-def pendulum_state_update(x_n, dt):
+def pendulum_state_update(x_n):
 
-    x_n[0] = x_n[0] + x_n[1]*dt
-    x_n[1] = x_n[1] - (g/L) * np.sin(x_n[0]) * dt
+    x_n[0] = x_n[0] + x_n[1]*(1/measurement_hz)
+    x_n[1] = x_n[1] - (g/L) * np.sin(x_n[0]) * (1/measurement_hz)
 
     return x_n
 
-def pendulum_jacobian(x_n, dt):
+def pendulum_jacobian(x_n):
 
-    return np.array([[ 1.0, dt], [ -(g/L) * np.cos(x_n[0])[0] * dt, 1.0 ]])
+    return np.array([[ 1.0, (1/measurement_hz)], [ -(g/L) * np.cos(x_n[0])[0] * (1/measurement_hz), 1.0 ]])
 
 def ekf_predict_t(x_n, P_n):
 
     # prediction
-    x_prediction_n = pendulum_state_update(x_n, dt)
+    x_prediction_n = pendulum_state_update(x_n)
 
     # uncertainty propagation
-    pendulum_jacobian_n = pendulum_jacobian(x_n, dt)
+    pendulum_jacobian_n = pendulum_jacobian(x_n)
 
     P_n = pendulum_jacobian_n @ P_n @ np.transpose(pendulum_jacobian_n) + Q
 

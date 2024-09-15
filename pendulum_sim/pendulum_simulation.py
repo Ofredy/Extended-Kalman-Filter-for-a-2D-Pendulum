@@ -25,10 +25,10 @@ x_0_guess_variance = 0.1
 simulation_time = 10 #s
 force_simulation_time = 20 #s
 dt = 0.05 # 50 ms
-measurement_hz = 1
+measurement_hz = 4
 
-Q = dt * np.array([[process_noise_variance, 0],
-                   [ 0, process_noise_variance]])
+Q = (1/measurement_hz) * np.array([[process_noise_variance, 0],
+                                   [ 0, process_noise_variance]])
 
 # Define the pendulum dynamics function
 def pendulum_dynamics(y, t, g, L, gamma, force_mag, force_frequency, external_force=False):
