@@ -19,7 +19,7 @@ force_frequency = 1
 # kalman filter constants
 process_noise_variance = 0.01
 measurement_noise_variance = 0.01
-x_0_guess_variance = 0.1
+x_0_guess_variance = 0.01
 
 # monte carlo constants
 simulation_time = 10 #s

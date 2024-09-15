@@ -7,13 +7,13 @@ from pendulum_simulation import *
 def pendulum_state_update(x_n):
 
     x_n[0] = x_n[0] + x_n[1]*(1/measurement_hz)
-    x_n[1] = x_n[1] - (g/L) * np.sin(x_n[0]) * (1/measurement_hz)
+    x_n[1] = x_n[1] - (g/L) * np.sin(x_n[0]) * (1/measurement_hz)  - (gamma/mass) * x_n[1]
 
     return x_n
 
 def pendulum_jacobian(x_n):
 
-    return np.array([[ 1.0, (1/measurement_hz)], [ -(g/L) * np.cos(x_n[0])[0] * (1/measurement_hz), 1.0 ]])
+    return np.array([[ 1, (1/measurement_hz)], [ -(g/L) * np.cos(x_n[0])[0] * (1/measurement_hz), 1 - (gamma/mass) ]])
 
 def ekf_predict_t(x_n, P_n):
 
