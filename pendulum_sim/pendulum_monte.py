@@ -127,30 +127,26 @@ def kalman_filter_simulation(monte_runs, external_force=False):
     return ekf_simulation_summary
 
 def assess_kalman_accuracy(monte_runs, ekf_simulation_summary, external_force=False):
-    
-    # Initialize variables to accumulate percentage error over all runs
-    total_avg_error = 0
 
-    time_indices = np.arange(int(simulation_time/dt)) % int((1/measurement_hz)/dt)  == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/measurement_hz)/dt)  == 0
+    total_mae = 0
 
-    # Iterate through each Monte Carlo run
+    time_indices = np.arange(int(simulation_time/dt)) % int((1/measurement_hz)/dt) == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/measurement_hz)/dt) == 0
+
     for run_idx in range(NUM_MONTE_RUNS):
-        
-        # Extract true state and Kalman filter estimates
+
         theta = monte_runs[run_idx][:, 0][time_indices]  # True state (theta)
         kalman_estimates = ekf_simulation_summary['ekf_estimates'][run_idx][:]  # Kalman estimates
 
-        # Compute absolute percentage error for this run (avoid division by zero)
-        avg_error = np.sum(np.abs((theta - kalman_estimates))) / kalman_estimates.shape[0]
+        mae = np.mean(np.abs(theta-kalman_estimates))
 
-        # Accumulate percentage error and count the number of time steps
-        total_avg_error += avg_error
+        total_mae += mae
 
-    # Compute MAPE across all runs
-    avg_error = total_avg_error / NUM_MONTE_RUNS
-    ekf_simulation_summary['avg_accuracy'] = abs( 1 - avg_error ) 
+    avg_mae = total_mae / NUM_MONTE_RUNS
+
+    ekf_simulation_summary['avg_mae'] = avg_mae
 
     return ekf_simulation_summary
+
 
 def plot_kalman_results(monte_runs, ekf_simulation_summary, external_force=False):
 
@@ -190,10 +186,10 @@ def plot_kalman_results(monte_runs, ekf_simulation_summary, external_force=False
     plt.ylabel('theta [rad]')
 
     if not external_force:
-        plt.title('EKF Monte Results, %d [Hz] Measurements, Avg Acc: %.3f%%' % (measurement_hz, ekf_simulation_summary['avg_accuracy']))
+        plt.title('EKF Monte Results, %d [Hz] Measurements, Avg MAE: %.3f' % (measurement_hz, ekf_simulation_summary['avg_mae']))
 
     else:
-        plt.title('EKF External Force Monte Results, %d [Hz] Measurements, Avg Acc: %.3f%%' % (measurement_hz, ekf_simulation_summary['avg_accuracy']))
+        plt.title('EKF External Force Monte Results, %d [Hz] Measurements, Avg MAE: %.3f' % (measurement_hz, ekf_simulation_summary['avg_mae']))
 
     plt.legend()
     plt.grid(True)
