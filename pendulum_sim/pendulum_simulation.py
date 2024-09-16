@@ -54,7 +54,7 @@ if __name__ == "__main__":
     t = np.arange(0, simulation_time, dt)
 
     # Solve the ODE 
-    solution = odeint(pendulum_dynamics, y0, t, args=(g, L, gamma, force_mag, force_frequency, True))
+    solution = odeint(pendulum_dynamics, y0, t, args=(g, L, gamma, force_mag, force_frequency, False))
 
     # Extract the results
     theta = solution[:, 0]  # Angle theta
