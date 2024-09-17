@@ -286,7 +286,7 @@ def plot_kalman_gain(ekf_simulation_summary, figure_num=1, external_force=False)
     else:
         plt.savefig("ex_force_kalman_gain_summary_%d_hz.png" % (measurement_hz))
 
-def plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_num=1, external_force=False):
+def plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_num=1, external_force=False, save_figs=False):
 
     # Create a new figure with figure number 6
     plt.figure(fig_num)
@@ -309,6 +309,9 @@ def plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_nu
     plt.grid(True)
     plt.title('True theta vs theta predictions: %d [Hz] Measurements' % (measurement_hz))
 
+    if save_figs:
+        plt.savefig("theta_vs_theta_predictions_%d_hz.png" % (measurement_hz))
+
     ########### true theta vs state prediction ###########
     plt.figure(fig_num+1)
     plt.plot(t, kalman_gains, label='Kalman Gain Norms')
@@ -317,6 +320,9 @@ def plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_nu
     plt.legend()
     plt.grid(True)
     plt.title('Kalman Gain Norm vs Time: %d [Hz] Measurements' % (measurement_hz))
+
+    if save_figs:
+        plt.savefig("kalman_norm_summary_%d_hz.png" % (measurement_hz))
 
 
 if __name__ == "__main__":
@@ -330,22 +336,21 @@ if __name__ == "__main__":
 
     # show results
     ekf_simulation_summary = assess_kalman_accuracy(monte_runs, ekf_simulation_summary)
-    #plot_kalman_results(monte_runs, ekf_simulation_summary)
-    #plot_kalman_error(monte_runs, ekf_simulation_summary)
-    plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_num=1)
+    plot_kalman_results(monte_runs, ekf_simulation_summary)
+    plot_kalman_error(monte_runs, ekf_simulation_summary)
     plt.show()
 
 
-#    ################# external force simulation #################
-#    # create monte data
-#    ex_force_monte_runs = generate_monte_runs(external_force=True)
-#    ex_force_monte_runs = add_noise_to_monte_runs(ex_force_monte_runs)
-#
-#    # do ekf monte sim
-#    ekf_ex_force_simulation_summary = kalman_filter_simulation(ex_force_monte_runs, external_force=True)
-#
-#    # show results
-#    ekf_ex_force_simulation_summary = assess_kalman_accuracy(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
-#    plot_kalman_results(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
-#    plot_kalman_error(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
-#    plt.show()
+    ################# external force simulation #################
+    # create monte data
+    ex_force_monte_runs = generate_monte_runs(external_force=True)
+    ex_force_monte_runs = add_noise_to_monte_runs(ex_force_monte_runs)
+
+    # do ekf monte sim
+    ekf_ex_force_simulation_summary = kalman_filter_simulation(ex_force_monte_runs, external_force=True)
+
+    # show results
+    ekf_ex_force_simulation_summary = assess_kalman_accuracy(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
+    plot_kalman_results(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
+    plot_kalman_error(ex_force_monte_runs, ekf_ex_force_simulation_summary, external_force=True)
+    plt.show()
