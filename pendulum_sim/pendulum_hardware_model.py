@@ -8,27 +8,27 @@ import numpy as np
 NUM_PENDULUM_COMPONENTS = 8
 
 rod = { 'lenght': 5,
-        'm': 2,
+        'm': 2 / 1000,
         'cm': np.array([0, 3, 0]) }
 
 box = { 'bx': 1,
         'by': 2,
-        'm': 2,
+        'm': 2 / 1000,
         'cm': np.array([0, 0, 0]) }
 
-battery = { 'm': 5,
+battery = { 'm': 5 / 1000,
             'cm': np.array([0, -0.3, 0]) }
 
-arduino_nano = { 'm': 1,
+arduino_nano = { 'm': 1 / 1000,
                  'cm': np.array(np.array([0.4, 0, 0])) }
 
-xbee = { 'm': 1,
+xbee = { 'm': 1 / 1000,
          'cm': np.array(np.array([-0.4, 0, 0])) } 
 
-hex_nut_1 = { 'm': 1.5,
+hex_nut_1 = { 'm': 1.5 / 1000,
               'cm': np.array(np.array([0, 0.45, 0])) } 
 
-hex_nut_2 = { 'm': 1.5,
+hex_nut_2 = { 'm': 1.5 / 1000,
               'cm': np.array(np.array([0, 0.55, 0])) } 
 
 pendulum_model_const = { 'rod': rod,
