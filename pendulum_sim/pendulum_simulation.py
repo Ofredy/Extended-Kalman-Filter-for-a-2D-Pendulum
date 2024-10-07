@@ -10,6 +10,9 @@ from matplotlib.animation import FuncAnimation
 # our imports
 from pendulum_hardware_model import get_pendulum_model
 
+# define pendulum model
+pendulum_model = get_pendulum_model()
+
 # dynamic constants
 g = 9.81  # gravitational acceleration (m/s^2)
 gamma = 0.05 # damping coefficient
@@ -25,9 +28,10 @@ x_0_guess_variance = 0.1
 simulation_time = 10 #s
 force_simulation_time = 20 #s
 dt = 0.05 # 50 ms
+prediction_hz = 20
 measurement_hz = 4
 
-Q = (1/measurement_hz) * np.array([[process_noise_variance, 0],
+Q = (1/prediction_hz) * np.array([[process_noise_variance, 0],
                                    [ 0, process_noise_variance]])
 
 # Define the pendulum dynamics function

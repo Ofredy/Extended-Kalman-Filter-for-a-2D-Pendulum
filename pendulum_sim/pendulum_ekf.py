@@ -6,14 +6,15 @@ from pendulum_simulation import *
 
 def pendulum_state_update(x_n):
 
-    x_n[0] = x_n[0] + x_n[1]*(1/measurement_hz)
-    x_n[1] = x_n[1] - (g/L) * np.sin(x_n[0]) * (1/measurement_hz)  - (gamma/mass) * x_n[1]
+    x_n[0] = x_n[0] + x_n[1]*(1/prediction_hz)
+    total_torque = -1 * pendulum_model['total_mass'] * g * pendulum_model['length'] * np.sin(x_n[0]) - gamma * x_n[1]
+    x_n[1] += (total_torque / pendulum_model['inertia']) * (1/prediction_hz)
 
     return x_n
 
 def pendulum_jacobian(x_n):
 
-    return np.array([[ 1, (1/measurement_hz)], [ -(g/L) * np.cos(x_n[0])[0] * (1/measurement_hz), 1 - (gamma/mass) ]])
+    return np.array([[ 1, (1/prediction_hz)], [ ( (-pendulum_model['total_mass'] * g * pendulum_model['length'] * np.cos(x_n[0])[0]) / pendulum_model['inertia'] ) * (1/prediction_hz), 1 - (gamma/pendulum_model['inertia']) * (1/prediction_hz) ]])
 
 def ekf_predict_t(x_n, P_n):
 
@@ -29,11 +30,11 @@ def ekf_predict_t(x_n, P_n):
 
 def observation_jacobian(x_prediction_n):
 
-    return np.array([ L * np.cos(x_prediction_n[0])[0], 0]).reshape(1, -1)
+    return np.array([ pendulum_model['length'] * np.cos(x_prediction_n[0])[0], 0]).reshape(1, -1)
 
 def ekf_update_t(x_prediction_n, P_n, z):
 
-    observation_value = L * np.sin(x_prediction_n[0])
+    observation_value = pendulum_model['length'] * np.sin(x_prediction_n[0])
     observation_jacobian_n = observation_jacobian(x_prediction_n)
 
     # calculate kalman gain
