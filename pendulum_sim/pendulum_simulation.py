@@ -7,6 +7,8 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
+# our imports
+from pendulum_hardware_model import get_pendulum_model
 
 # dynamic constants
 mass = 1 # mass of ball g   
@@ -31,7 +33,7 @@ Q = (1/measurement_hz) * np.array([[process_noise_variance, 0],
                                    [ 0, process_noise_variance]])
 
 # Define the pendulum dynamics function
-def pendulum_dynamics(y, t, g, L, gamma, force_mag, force_frequency, external_force=False):
+def pendulum_dynamics(y, t, g, L, gamma, force_mag, force_frequency, inertia, mass, external_force=False):
 
     theta, omega = y
     dtheta_dt = omega
@@ -53,8 +55,11 @@ if __name__ == "__main__":
     # Time array
     t = np.arange(0, simulation_time, dt)
 
+    # pendulum model summary
+    pendulum_model = get_pendulum_model()
+
     # Solve the ODE 
-    solution = odeint(pendulum_dynamics, y0, t, args=(g, L, gamma, force_mag, force_frequency, False))
+    solution = odeint(pendulum_dynamics, y0, t, args=(g, pendulum_model['length'], gamma, force_mag, force_frequency, pendulum_model['inertia'], pendulum_model['total_mass'], False))
 
     # Extract the results
     theta = solution[:, 0]  # Angle theta

@@ -7,38 +7,6 @@ import numpy as np
 
 NUM_PENDULUM_COMPONENTS = 8
 
-rod = { 'lenght': 5,
-        'm': 2 / 1000,
-        'cm': np.array([0, 3, 0]) }
-
-box = { 'bx': 1,
-        'by': 2,
-        'm': 2 / 1000,
-        'cm': np.array([0, 0, 0]) }
-
-battery = { 'm': 5 / 1000,
-            'cm': np.array([0, -0.3, 0]) }
-
-arduino_nano = { 'm': 1 / 1000,
-                 'cm': np.array(np.array([0.4, 0, 0])) }
-
-xbee = { 'm': 1 / 1000,
-         'cm': np.array(np.array([-0.4, 0, 0])) } 
-
-hex_nut_1 = { 'm': 1.5 / 1000,
-              'cm': np.array(np.array([0, 0.45, 0])) } 
-
-hex_nut_2 = { 'm': 1.5 / 1000,
-              'cm': np.array(np.array([0, 0.55, 0])) } 
-
-pendulum_model_const = { 'rod': rod,
-                         'box': box,
-                         'battery': battery,
-                         'an': arduino_nano,
-                         'xbee': xbee,
-                         'hx1': hex_nut_1,
-                         'hx2': hex_nut_2 }
-
 ########### functions to find pendulum cm and inertia tensor ###########
 
 def find_cm(masses, positions):
@@ -55,12 +23,52 @@ def get_tilde_matrix(vec):
                      [ v3, 0, -v1 ],
                      [ -v2, v1, 0 ]])
 
-def find_inertia_tensor(pendulum_model_const):
+def parallel_axis_theorem(total_mass, inertia_tensor_cm, inertia_offset):
+
+    offset_tilde = get_tilde_matrix(inertia_offset)
+
+    return inertia_tensor_cm + total_mass * offset_tilde @ np.transpose(offset_tilde)
+
+def get_pendulum_model():
+
+    rod_length = 30.38 / 100
+
+    rod = { 'lenght': rod_length,
+        'm': 311 / 1000,
+        'cm': np.array([0, rod_length / 2, 0]) }
+
+    box = { 'bx': 10 / 100,
+            'by': 5 / 100,
+            'm': 30 / 1000,
+            'cm': np.array([0, 0, 0]) }
+
+    battery = { 'm': 69 / 1000,
+                'cm': np.array([0, -0.2 / 100, 0]) }
+
+    arduino_nano = { 'm': 5 / 1000,
+                     'cm': np.array(np.array([4 / 100, 0, 0])) }
+
+    xbee = { 'm': 5 / 1000,
+             'cm': np.array(np.array([-4 / 100, 0, 0])) } 
+
+    hex_nut_1 = { 'm': 2 / 1000,
+                  'cm': np.array(np.array([0, 2.5 / 100, 0])) } 
+
+    hex_nut_2 = { 'm': 2 / 1000,
+                  'cm': np.array(np.array([0, 3.5 / 100, 0])) } 
+
+    pendulum_model = { 'rod': rod,
+                       'box': box,
+                       'battery': battery,
+                       'an': arduino_nano,
+                       'xbee': xbee,
+                       'hx1': hex_nut_1,
+                       'hx2': hex_nut_2 }
 
     masses = np.zeros(shape=(NUM_PENDULUM_COMPONENTS))
     positions = np.zeros(shape=(NUM_PENDULUM_COMPONENTS, 3))
 
-    for idx, hash_pair in enumerate(pendulum_model_const.items()):
+    for idx, hash_pair in enumerate(pendulum_model.items()):
 
         _, p_comp = hash_pair
 
@@ -79,16 +87,21 @@ def find_inertia_tensor(pendulum_model_const):
 
         inertia_tensor += -masses[idx] * tilde_matrix @ tilde_matrix 
 
-    pendulum_model = { 'total_mass': total_mass,
-                       'cm': pendulum_cm ,
-                       'inertia': inertia_tensor}
+    pivot_offset = np.array([0, rod_length, 0]) - pendulum_cm
+
+    inertia_tensor = parallel_axis_theorem(total_mass, inertia_tensor, pivot_offset)
+
+    pendulum_model.update({ 'total_mass': total_mass,
+                            'cm': pendulum_cm ,
+                            'inertia': inertia_tensor[0][0],
+                            'length': pivot_offset[1]})
 
     return pendulum_model
 
 
 if __name__ == '__main__':
 
-    pendulum_model = find_inertia_tensor(pendulum_model_const)
+    pendulum_model = get_pendulum_model()
 
     print(pendulum_model['total_mass'])
     print(pendulum_model['cm'])
