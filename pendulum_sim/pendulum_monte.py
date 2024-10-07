@@ -75,18 +75,18 @@ def simulation_init():
 def kalman_filter_simulation(monte_runs, external_force=False):
 
     if not external_force:
-        monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/prediction_hz))))
+        monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/imu_hz))))
         monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/measurement_hz))))
-        monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/prediction_hz))))
-        monte_k_n = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/prediction_hz))))
-        state_predictions = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/prediction_hz))))
+        monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/imu_hz))))
+        monte_k_n = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/imu_hz))))
+        state_predictions = np.zeros(shape=(NUM_MONTE_RUNS, int(simulation_time/(1/imu_hz))))
 
     else:
-        monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/prediction_hz))))
+        monte_kalman_estimates = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/imu_hz))))
         monte_measurement_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/measurement_hz))))
-        monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/prediction_hz))))
-        monte_k_n = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/prediction_hz))))
-        state_predictions = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/prediction_hz))))
+        monte_covaraince_time_steps = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/imu_hz))))
+        monte_k_n = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/imu_hz))))
+        state_predictions = np.zeros(shape=(NUM_MONTE_RUNS, int(force_simulation_time/(1/imu_hz))))
 
     for run_idx in range(NUM_MONTE_RUNS):
 
@@ -101,7 +101,7 @@ def kalman_filter_simulation(monte_runs, external_force=False):
 
         for time_step_idx in range(loop_range):
             
-            prediction_rate_idx = (1/prediction_hz) / dt 
+            prediction_rate_idx = (1/imu_hz) / dt 
             measurement_rate_idx = (1/measurement_hz) / dt 
 
             if time_step_idx % prediction_rate_idx == 0:
@@ -142,7 +142,7 @@ def assess_kalman_accuracy(monte_runs, ekf_simulation_summary, external_force=Fa
 
     total_mae = 0
 
-    time_indices = np.arange(int(simulation_time/dt)) % int((1/prediction_hz)/dt) == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/prediction_hz)/dt) == 0
+    time_indices = np.arange(int(simulation_time/dt)) % int((1/imu_hz)/dt) == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/imu_hz)/dt) == 0
 
     for run_idx in range(NUM_MONTE_RUNS):
 
@@ -163,10 +163,10 @@ def assess_kalman_accuracy(monte_runs, ekf_simulation_summary, external_force=Fa
 def plot_kalman_results(monte_runs, ekf_simulation_summary, external_force=False):
 
     # Time array
-    t = np.arange(0, simulation_time, (1/prediction_hz)) if not external_force else np.arange(0, force_simulation_time, (1/prediction_hz))
+    t = np.arange(0, simulation_time, (1/imu_hz)) if not external_force else np.arange(0, force_simulation_time, (1/imu_hz))
     plt.figure(1)
 
-    time_indices = np.arange(int(simulation_time/dt)) % int((1/prediction_hz)/dt)  == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/prediction_hz)/dt)  == 0
+    time_indices = np.arange(int(simulation_time/dt)) % int((1/imu_hz)/dt)  == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/imu_hz)/dt)  == 0
     monte_time = simulation_time if not external_force else force_simulation_time
 
     monte_kalman_estimates = ekf_simulation_summary['ekf_estimates']
@@ -199,27 +199,27 @@ def plot_kalman_results(monte_runs, ekf_simulation_summary, external_force=False
     plt.ylabel('theta [rad]')
 
     if not external_force:
-        plt.title('EKF Monte Results, %d [Hz] Pred, %d [Hz] Meas, Avg MAE: %.3f' % (prediction_hz, measurement_hz, ekf_simulation_summary['avg_mae']))
+        plt.title('EKF Monte Results, %d [Hz] Pred, %d [Hz] Meas, Avg MAE: %.3f' % (imu_hz, measurement_hz, ekf_simulation_summary['avg_mae']))
 
     else:
-        plt.title('EKF External Force Monte Results, %d [Hz] Pred, %d [Hz] Meas, Avg MAE: %.3f' % (prediction_hz, measurement_hz, ekf_simulation_summary['avg_mae']))
+        plt.title('EKF External Force Monte Results, %d [Hz] Pred, %d [Hz] Meas, Avg MAE: %.3f' % (imu_hz, measurement_hz, ekf_simulation_summary['avg_mae']))
 
     plt.legend()
     plt.grid(True)
 
     if not external_force:
-        plt.savefig("ekf_monte_results_%d_hz.png" % prediction_hz)
+        plt.savefig("ekf_monte_results_%d_hz.png" % imu_hz)
 
     else:
-        plt.savefig("ekf_external_force_monte_results_%d_hz.png" %prediction_hz)
+        plt.savefig("ekf_external_force_monte_results_%d_hz.png" %imu_hz)
 
 def plot_kalman_error(monte_runs, ekf_simulation_summary, external_force=False):
 
     # Time array
-    t = np.arange(0, simulation_time, (1/prediction_hz)) if not external_force else np.arange(0, force_simulation_time, (1/prediction_hz))
+    t = np.arange(0, simulation_time, (1/imu_hz)) if not external_force else np.arange(0, force_simulation_time, (1/imu_hz))
     plt.figure(2)
 
-    time_indices = np.arange(int(simulation_time/dt)) % int((1/prediction_hz)/dt)  == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/prediction_hz)/dt)  == 0
+    time_indices = np.arange(int(simulation_time/dt)) % int((1/imu_hz)/dt)  == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/imu_hz)/dt)  == 0
     monte_kalman_estimates = ekf_simulation_summary['ekf_estimates']
     monte_covariance_time_steps = ekf_simulation_summary['covariance']
 
@@ -248,24 +248,24 @@ def plot_kalman_error(monte_runs, ekf_simulation_summary, external_force=False):
     plt.ylabel('Error [rad]')
 
     if not external_force:
-        plt.title('EKF Monte Error vs Time with %d [Hz] Pred, %d [Hz] Meas,' % (prediction_hz, measurement_hz))
+        plt.title('EKF Monte Error vs Time with %d [Hz] Pred, %d [Hz] Meas,' % (imu_hz, measurement_hz))
 
     else:
-        plt.title('EKF With External Force Monte Error vs Time  with %d [Hz] Pred, %d [Hz] Meas,' % (prediction_hz, measurement_hz))
+        plt.title('EKF With External Force Monte Error vs Time  with %d [Hz] Pred, %d [Hz] Meas,' % (imu_hz, measurement_hz))
     
     plt.legend()
     plt.grid(True)
 
     if not external_force:
-        plt.savefig("ekf_monte_error_%d_hz.png" % prediction_hz)
+        plt.savefig("ekf_monte_error_%d_hz.png" % imu_hz)
 
     else:
-        plt.savefig("ekf_external_force_monte_error_%d_hz.png" % prediction_hz)
+        plt.savefig("ekf_external_force_monte_error_%d_hz.png" % imu_hz)
 
 def plot_kalman_gain(ekf_simulation_summary, figure_num=1, external_force=False):
 
     plt.figure(figure_num)
-    t = np.arange(0, simulation_time, (1/prediction_hz)) if not external_force else np.arange(0, force_simulation_time, (1/prediction_hz))    
+    t = np.arange(0, simulation_time, (1/imu_hz)) if not external_force else np.arange(0, force_simulation_time, (1/imu_hz))    
     
     for run_idx in range(NUM_MONTE_RUNS):
 
@@ -282,27 +282,27 @@ def plot_kalman_gain(ekf_simulation_summary, figure_num=1, external_force=False)
     plt.ylabel('Kalman Gain Norm')
 
     if not external_force:
-        plt.title('Kalman Gain Norm vs Time, %d [Hz] Mesurements' % prediction_hz)
+        plt.title('Kalman Gain Norm vs Time, %d [Hz] Mesurements' % imu_hz)
 
     else:
-        plt.title('External Force Kalman Gain Norm vs Time, %d [Hz] Mesurements' % prediction_hz)
+        plt.title('External Force Kalman Gain Norm vs Time, %d [Hz] Mesurements' % imu_hz)
     
     plt.legend()
     plt.grid(True)
 
     if not external_force:
-        plt.savefig("kalman_gain_summary_%d_hz.png" % prediction_hz)
+        plt.savefig("kalman_gain_summary_%d_hz.png" % imu_hz)
 
     else:
-        plt.savefig("ex_force_kalman_gain_summary_%d_hz.png" % prediction_hz)
+        plt.savefig("ex_force_kalman_gain_summary_%d_hz.png" % imu_hz)
 
 def plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_num=1, external_force=False, save_figs=False):
 
     # Create a new figure with figure number 6
     plt.figure(fig_num)
 
-    t = np.arange(0, simulation_time, (1/prediction_hz)) if not external_force else np.arange(0, force_simulation_time, (1/prediction_hz))
-    time_indices = np.arange(int(simulation_time/dt)) % int((1/prediction_hz)/dt)  == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/prediction_hz)/dt)  == 0
+    t = np.arange(0, simulation_time, (1/imu_hz)) if not external_force else np.arange(0, force_simulation_time, (1/imu_hz))
+    time_indices = np.arange(int(simulation_time/dt)) % int((1/imu_hz)/dt)  == 0 if not external_force else np.arange(int(force_simulation_time/dt)) % int((1/imu_hz)/dt)  == 0
 
     theta = monte_runs[0][:, 0][time_indices]
     theta_prediction = ekf_simulation_summary['state_predictions'][0][:]
@@ -317,10 +317,10 @@ def plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_nu
     plt.ylabel('theta [rad]')
     plt.legend()
     plt.grid(True)
-    plt.title('True theta vs theta predictions: %d [Hz] Measurements' % prediction_hz)
+    plt.title('True theta vs theta predictions: %d [Hz] Measurements' % imu_hz)
 
     if save_figs:
-        plt.savefig("theta_vs_theta_predictions_%d_hz.png" % prediction_hz)
+        plt.savefig("theta_vs_theta_predictions_%d_hz.png" % imu_hz)
 
     ########### true theta vs state prediction ###########
     plt.figure(fig_num+1)
@@ -329,10 +329,10 @@ def plot_theta_vs_prediction_and_gain(monte_runs, ekf_simulation_summary, fig_nu
     plt.ylabel('Kalman Gain Norm')
     plt.legend()
     plt.grid(True)
-    plt.title('Kalman Gain Norm vs Time: %d [Hz] Measurements' % prediction_hz)
+    plt.title('Kalman Gain Norm vs Time: %d [Hz] Measurements' % imu_hz)
 
     if save_figs:
-        plt.savefig("kalman_norm_summary_%d_hz.png" % prediction_hz)
+        plt.savefig("kalman_norm_summary_%d_hz.png" % imu_hz)
 
 
 if __name__ == "__main__":

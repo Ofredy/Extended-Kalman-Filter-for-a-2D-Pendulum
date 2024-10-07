@@ -6,15 +6,15 @@ from pendulum_simulation import *
 
 def pendulum_state_update(x_n):
 
-    x_n[0] = x_n[0] + x_n[1]*(1/prediction_hz)
+    x_n[0] = x_n[0] + x_n[1]*(1/imu_hz)
     total_torque = -1 * pendulum_model['total_mass'] * g * pendulum_model['length'] * np.sin(x_n[0]) - gamma * x_n[1]
-    x_n[1] += (total_torque / pendulum_model['inertia']) * (1/prediction_hz)
+    x_n[1] += (total_torque / pendulum_model['inertia']) * (1/imu_hz)
 
     return x_n
 
 def pendulum_jacobian(x_n):
 
-    return np.array([[ 1, (1/prediction_hz)], [ ( (-pendulum_model['total_mass'] * g * pendulum_model['length'] * np.cos(x_n[0])[0]) / pendulum_model['inertia'] ) * (1/prediction_hz), 1 - (gamma/pendulum_model['inertia']) * (1/prediction_hz) ]])
+    return np.array([[ 1, (1/imu_hz)], [ ( (-pendulum_model['total_mass'] * g * pendulum_model['length'] * np.cos(x_n[0])[0]) / pendulum_model['inertia'] ) * (1/imu_hz), 1 - (gamma/pendulum_model['inertia']) * (1/imu_hz) ]])
 
 def ekf_predict_t(x_n, P_n):
 
