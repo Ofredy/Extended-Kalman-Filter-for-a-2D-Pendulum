@@ -13,8 +13,8 @@ from pendulum_hardware_model import get_pendulum_model
 # dynamic constants
 g = 9.81  # gravitational acceleration (m/s^2)
 gamma = 0.05 # damping coefficient
-force_mag = 10
-force_frequency = 1
+force_mag = 0.25
+force_frequency = 0.75
 
 # kalman filter constants
 process_noise_variance = 0.01
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     pendulum_model = get_pendulum_model()
 
     # Solve the ODE 
-    solution = odeint(pendulum_dynamics, y0, t, args=(g, pendulum_model['length'], gamma, force_mag, force_frequency, pendulum_model['inertia'], pendulum_model['total_mass'], False))
+    solution = odeint(pendulum_dynamics, y0, t, args=(g, pendulum_model['length'], gamma, force_mag, force_frequency, pendulum_model['inertia'], pendulum_model['total_mass'], True))
 
     # Extract the results
     theta = solution[:, 0]  # Angle theta
