@@ -11,10 +11,8 @@ from matplotlib.animation import FuncAnimation
 from pendulum_hardware_model import get_pendulum_model
 
 # dynamic constants
-mass = 1 # mass of ball g   
 g = 9.81  # gravitational acceleration (m/s^2)
-L = 1.0   # length of the pendulum (m)
-gamma = 1 # damping coefficient
+gamma = 0.05 # damping coefficient
 force_mag = 10
 force_frequency = 1
 
@@ -37,14 +35,24 @@ def pendulum_dynamics(y, t, g, L, gamma, force_mag, force_frequency, inertia, ma
 
     theta, omega = y
     dtheta_dt = omega
+    
+    # Calculate the torque due to gravity and damping
+    torque_gravity = - mass * g * L * np.sin(theta)  # Torque from gravity
+    torque_damping = - (gamma * omega)  # Damping torque
 
-    if not external_force:
-        domega_dt = - (g / L) * np.sin(theta) - (gamma/mass) * omega
-
+    # Apply external force if present
+    if external_force:
+        external_torque = force_mag * np.cos(2 * np.pi * force_frequency * t)
     else:
-        domega_dt = - (g / L) * np.sin(theta) - (gamma/mass) * omega + force_mag * np.cos(2 * np.pi * force_frequency * t)
+        external_torque = 0
 
-    return [ dtheta_dt, domega_dt ]
+    # Total torque
+    total_torque = torque_gravity + torque_damping + external_torque
+
+    # Angular acceleration
+    domega_dt = total_torque / inertia
+
+    return [dtheta_dt, domega_dt]
 
 
 if __name__ == "__main__":
@@ -81,6 +89,7 @@ if __name__ == "__main__":
     plt.show()
 
     # Convert theta to Cartesian coordinates for animation
+    L = pendulum_model['length']
     x = L * np.sin(theta)
     y = -L * np.cos(theta)
 
@@ -88,12 +97,12 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
 
     # Set axis limits
-    ax.set_xlim(-L - 1, L + 1)
-    ax.set_ylim(-L - 1, 1)
+    ax.set_xlim(-L - L/2, L + L/2)
+    ax.set_ylim(-L - L/2, L + L/2)
 
     # Create pendulum arm and bob (pre-allocate)
     line, = ax.plot([], [], color='blue', label='Pendulum Arm')  # Line for the arm
-    circle = plt.Circle((0, -L), 0.075, color='red', label='Pendulum Ball')  # Circle for the bob
+    circle = plt.Circle((0, -L), 0.009, color='red', label='Pendulum Ball')  # Circle for the bob
     ax.add_patch(circle)
     ax.legend(loc='upper left')
 

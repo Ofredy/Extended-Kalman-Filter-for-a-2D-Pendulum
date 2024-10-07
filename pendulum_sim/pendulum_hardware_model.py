@@ -34,16 +34,16 @@ def get_pendulum_model():
     rod_length = 30.38 / 100
 
     rod = { 'lenght': rod_length,
-        'm': 311 / 1000,
-        'cm': np.array([0, rod_length / 2, 0]) }
+            'm': 311 / 1000,
+            'cm': np.array([0, rod_length / 2, 0]) }
 
     box = { 'bx': 10 / 100,
-            'by': 5 / 100,
+            'by': 10 / 100,
             'm': 30 / 1000,
             'cm': np.array([0, 0, 0]) }
 
     battery = { 'm': 69 / 1000,
-                'cm': np.array([0, -0.2 / 100, 0]) }
+                'cm': np.array([0, -4 / 100 , 0]) }
 
     arduino_nano = { 'm': 5 / 1000,
                      'cm': np.array(np.array([4 / 100, 0, 0])) }
@@ -52,10 +52,10 @@ def get_pendulum_model():
              'cm': np.array(np.array([-4 / 100, 0, 0])) } 
 
     hex_nut_1 = { 'm': 2 / 1000,
-                  'cm': np.array(np.array([0, 2.5 / 100, 0])) } 
+                  'cm': np.array(np.array([0, 4.5/ 100, 0])) } 
 
     hex_nut_2 = { 'm': 2 / 1000,
-                  'cm': np.array(np.array([0, 3.5 / 100, 0])) } 
+                  'cm': np.array(np.array([0, 5.5 / 100, 0])) } 
 
     pendulum_model = { 'rod': rod,
                        'box': box,
